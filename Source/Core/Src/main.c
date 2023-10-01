@@ -31,7 +31,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define NUMBER_7SEG 2
+#define NUMBER_7SEG 4
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -56,7 +56,7 @@ const short Pin_7SEG[7] = {
 
 GPIO_TypeDef* GPIO_EN = GPIOA;
 const short Pin_EN[NUMBER_7SEG] = {
-	EN0_Pin, EN1_Pin
+	EN0_Pin, EN1_Pin, EN2_Pin, EN3_Pin
 };
 
 int LED_ID = 0;
@@ -115,16 +115,25 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   SetTimerLED(100);
   SetTimer7SEG(50);
+  SetTimerDOT(100);
   while (1)
   {
 	  if (GetFlagTimerLED()) {
 		  SetTimerLED(100);
 		  HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
 	  }
+	  if (GetFlagTimerDOT()){
+		  SetTimerDOT(100);
+		  HAL_GPIO_TogglePin(DOT_GPIO_Port, DOT_Pin);
+	  }
 	  if (GetFlagTimer7SEG()){
 		  SetTimer7SEG(50);
 		  LED_ID = (LED_ID + 1) % NUMBER_7SEG;
-		  DisplayMultiple7SEG(LED_ID, LED_ID + 1);
+		  if (LED_ID == 3) {
+			  DisplayMultiple7SEG(LED_ID, 0);
+		  } else {
+			  DisplayMultiple7SEG(LED_ID, LED_ID + 1);
+		  }
 	  }
     /* USER CODE END WHILE */
 
@@ -228,14 +237,17 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, LED_Pin|EN0_Pin|EN1_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, DOT_Pin|LED_Pin|EN0_Pin|EN1_Pin
+                          |EN2_Pin|EN3_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, _7SEG_A_Pin|_7SEG_B_Pin|_7SEG_C_Pin|_7SEG_D_Pin
                           |_7SEG_E_Pin|_7SEG_F_Pin|_7SEG_G_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pins : LED_Pin EN0_Pin EN1_Pin */
-  GPIO_InitStruct.Pin = LED_Pin|EN0_Pin|EN1_Pin;
+  /*Configure GPIO pins : DOT_Pin LED_Pin EN0_Pin EN1_Pin
+                           EN2_Pin EN3_Pin */
+  GPIO_InitStruct.Pin = DOT_Pin|LED_Pin|EN0_Pin|EN1_Pin
+                          |EN2_Pin|EN3_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;

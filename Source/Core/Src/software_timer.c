@@ -14,6 +14,9 @@ void SetTimerDefault(int duration, int index){
 	CounterTimer[index] = duration;
 	FlagTimer[index] = 0;
 }
+short GetFlagTimerDefault(int index){
+	return FlagTimer[index];
+}
 void TimerRunDefault(int index){
 	if (CounterTimer[index] <= 0) return;
 	CounterTimer[index]--;
@@ -21,10 +24,6 @@ void TimerRunDefault(int index){
 		FlagTimer[index] = 1;
 	}
 }
-short GetFlagTimerDefault(int index){
-	return FlagTimer[index];
-}
-
 
 void SetTimer7SEG(int duration){
 	SetTimerDefault(duration, TIMER_FOR_7SEG);
@@ -48,7 +47,19 @@ void TimerRunLED(){
 }
 
 
+void SetTimerDOT(int duration){
+	SetTimerDefault(duration, TIMER_FOR_DOT);
+}
+short GetFlagTimerDOT(){
+	return GetFlagTimerDefault(TIMER_FOR_DOT);
+}
+void TimerRunDOT(){
+	TimerRunDefault(TIMER_FOR_DOT);
+}
+
+
 void TimerRun(){
 	TimerRun7SEG();
 	TimerRunLED();
+	TimerRunDOT();
 }
