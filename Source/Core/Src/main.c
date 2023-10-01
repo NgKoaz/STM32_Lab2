@@ -32,6 +32,9 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 #define MAX_7SEG 4
+#define COUNTER_LED 100
+#define COUNTER_7SEG 25
+#define COUNTER_DOT 100
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -61,8 +64,12 @@ const short Pin_EN[MAX_7SEG] = {
 
 int _7SEG_Index = 0;
 int _7SEG_Buffer[MAX_7SEG] = {
-		1, 2, 3, 4
+		1, 1, 1, 2
 };
+
+int hour = 0;
+int minute = 0;
+int second = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -75,7 +82,8 @@ void DisplayOne7SEG(int num);
 void EnableOne7SEG(int LED_ID);
 void DisplayMultiple7SEG(int status, int num);
 void Update7SEG(int index);
-void TestClockBuffer(void);
+void UpdateClockBuffer(void);
+void ClockTickTick(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -118,23 +126,26 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  SetTimerLED(20);
-  SetTimer7SEG(25);
-  SetTimerDOT(100);
+  SetTimerLED(COUNTER_LED);
+  SetTimer7SEG(COUNTER_7SEG);
+  SetTimerDOT(COUNTER_DOT);
+  UpdateClockBuffer();
   while (1)
   {
 	  if (GetFlagTimerLED()) {
-		  SetTimerLED(100);
+		  SetTimerLED(COUNTER_LED);
 		  HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-
-		  TestClockBuffer();
+		  //Invoked every one second.
+		  ClockTickTick();
 	  }
 	  if (GetFlagTimerDOT()){
-		  SetTimerDOT(100);
+		  //Invoked every one second.
+		  SetTimerDOT(COUNTER_DOT);
 		  HAL_GPIO_TogglePin(DOT_GPIO_Port, DOT_Pin);
 	  }
 	  if (GetFlagTimer7SEG()){
-		  SetTimer7SEG(25);
+		  SetTimer7SEG(COUNTER_7SEG);
+		  //Switching LED every 250ms
 		  _7SEG_Index = (_7SEG_Index + 1) % MAX_7SEG;
 		  Update7SEG(_7SEG_Index);
 	  }
@@ -297,16 +308,26 @@ void Update7SEG(int index){
 	if (index > 3) return;
 	DisplayMultiple7SEG(index, _7SEG_Buffer[index]);
 }
-void TestClockBuffer(void){
-	_7SEG_Buffer[MAX_7SEG - 1]++;
-	for(int i = MAX_7SEG - 1; i >= 0; i--){
-		if (_7SEG_Buffer[i] >= 10) {
-			_7SEG_Buffer[i] = 0;
-			if (i > 0){
-				_7SEG_Buffer[i - 1]++;
-			}
-		}
+void UpdateClockBuffer(void){
+	_7SEG_Buffer[0] = hour / 10;
+	_7SEG_Buffer[1] = hour % 10;
+	_7SEG_Buffer[2] = minute / 10;
+	_7SEG_Buffer[3] = minute % 10;
+}
+void ClockTickTick(void){
+	second++;
+	if (second >= 60){
+		second = 0;
+		minute++;
 	}
+	if(minute >= 60){
+		minute = 0;
+		hour++;
+	}
+	if(hour >= 24){
+		hour = 0;
+	}
+	UpdateClockBuffer();
 }
 /* USER CODE END 4 */
 
