@@ -21,7 +21,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "software_timer.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -31,6 +31,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+#define NUMBER_7SEG 2
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -42,14 +43,34 @@
 TIM_HandleTypeDef htim2;
 
 /* USER CODE BEGIN PV */
+const short b[10] = {
+		1, 79, 18, 6, 76,
+		36, 32, 15, 0, 4
+};
 
+GPIO_TypeDef* GPIO_7SEG = GPIOB;
+const short Pin_7SEG[7] = {
+	_7SEG_A_Pin, _7SEG_B_Pin, _7SEG_C_Pin, _7SEG_D_Pin,
+	_7SEG_E_Pin, _7SEG_F_Pin, _7SEG_G_Pin
+};
+
+GPIO_TypeDef* GPIO_EN = GPIOA;
+const short Pin_EN[NUMBER_7SEG] = {
+	EN0_Pin, EN1_Pin
+};
+
+int LED_ID = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
+static void MX_GPIO_Init(void);
 static void MX_TIM2_Init(void);
 /* USER CODE BEGIN PFP */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim);
+void DisplayOne7SEG(int num);
+void EnableOne7SEG(int LED_ID);
+void DisplayMultiple7SEG(int status, int num);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -84,16 +105,27 @@ int main(void)
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
+  MX_GPIO_Init();
   MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
-
+  HAL_TIM_Base_Start_IT(&htim2);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  HAL_TIM_Base_Start_IT(&htim2);
+  SetTimerLED(100);
+  SetTimer7SEG(50);
   while (1)
   {
+	  if (GetFlagTimerLED()) {
+		  SetTimerLED(100);
+		  HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+	  }
+	  if (GetFlagTimer7SEG()){
+		  SetTimer7SEG(50);
+		  LED_ID = (LED_ID + 1) % NUMBER_7SEG;
+		  DisplayMultiple7SEG(LED_ID, LED_ID + 1);
+	  }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -182,10 +214,69 @@ static void MX_TIM2_Init(void)
 
 }
 
+/**
+  * @brief GPIO Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_GPIO_Init(void)
+{
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
+
+  /* GPIO Ports Clock Enable */
+  __HAL_RCC_GPIOA_CLK_ENABLE();
+  __HAL_RCC_GPIOB_CLK_ENABLE();
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOA, LED_Pin|EN0_Pin|EN1_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOB, _7SEG_A_Pin|_7SEG_B_Pin|_7SEG_C_Pin|_7SEG_D_Pin
+                          |_7SEG_E_Pin|_7SEG_F_Pin|_7SEG_G_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pins : LED_Pin EN0_Pin EN1_Pin */
+  GPIO_InitStruct.Pin = LED_Pin|EN0_Pin|EN1_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : _7SEG_A_Pin _7SEG_B_Pin _7SEG_C_Pin _7SEG_D_Pin
+                           _7SEG_E_Pin _7SEG_F_Pin _7SEG_G_Pin */
+  GPIO_InitStruct.Pin = _7SEG_A_Pin|_7SEG_B_Pin|_7SEG_C_Pin|_7SEG_D_Pin
+                          |_7SEG_E_Pin|_7SEG_F_Pin|_7SEG_G_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+}
+
 /* USER CODE BEGIN 4 */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-
+	TimerRun();
+}
+void DisplayOne7SEG(int num){
+	if (num > 9 || num < 0) return;
+	int sel = b[num];
+	for (int i = 6; i >= 0; i--){
+		HAL_GPIO_WritePin(GPIO_7SEG, Pin_7SEG[i], sel % 2);
+		sel /= 2;
+	}
+}
+void EnableOne7SEG(int LED_ID){
+	for (int i = 0; i < NUMBER_7SEG; i++){
+		if (i == LED_ID){
+			HAL_GPIO_WritePin(GPIO_EN, Pin_EN[i], RESET);
+		} else {
+			HAL_GPIO_WritePin(GPIO_EN, Pin_EN[i], SET);
+		}
+	}
+}
+void DisplayMultiple7SEG(int status, int num){
+	EnableOne7SEG(status);
+	DisplayOne7SEG(num);
 }
 /* USER CODE END 4 */
 
