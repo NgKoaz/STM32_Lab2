@@ -31,7 +31,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define NUMBER_7SEG 4
+#define MAX_7SEG 4
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -55,11 +55,14 @@ const short Pin_7SEG[7] = {
 };
 
 GPIO_TypeDef* GPIO_EN = GPIOA;
-const short Pin_EN[NUMBER_7SEG] = {
+const short Pin_EN[MAX_7SEG] = {
 	EN0_Pin, EN1_Pin, EN2_Pin, EN3_Pin
 };
 
-int LED_ID = 0;
+int _7SEG_Index = 0;
+int _7SEG_Buffer[MAX_7SEG] = {
+		1, 2, 3, 4
+};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -71,6 +74,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim);
 void DisplayOne7SEG(int num);
 void EnableOne7SEG(int LED_ID);
 void DisplayMultiple7SEG(int status, int num);
+void Update7SEG(int index);
+void TestClockBuffer(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -113,7 +118,7 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  SetTimerLED(100);
+  SetTimerLED(20);
   SetTimer7SEG(50);
   SetTimerDOT(100);
   while (1)
@@ -121,6 +126,8 @@ int main(void)
 	  if (GetFlagTimerLED()) {
 		  SetTimerLED(100);
 		  HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+
+		  TestClockBuffer();
 	  }
 	  if (GetFlagTimerDOT()){
 		  SetTimerDOT(100);
@@ -128,12 +135,8 @@ int main(void)
 	  }
 	  if (GetFlagTimer7SEG()){
 		  SetTimer7SEG(50);
-		  LED_ID = (LED_ID + 1) % NUMBER_7SEG;
-		  if (LED_ID == 3) {
-			  DisplayMultiple7SEG(LED_ID, 0);
-		  } else {
-			  DisplayMultiple7SEG(LED_ID, LED_ID + 1);
-		  }
+		  _7SEG_Index = (_7SEG_Index + 1) % MAX_7SEG;
+		  Update7SEG(_7SEG_Index);
 	  }
     /* USER CODE END WHILE */
 
@@ -278,7 +281,7 @@ void DisplayOne7SEG(int num){
 	}
 }
 void EnableOne7SEG(int LED_ID){
-	for (int i = 0; i < NUMBER_7SEG; i++){
+	for (int i = 0; i < MAX_7SEG; i++){
 		if (i == LED_ID){
 			HAL_GPIO_WritePin(GPIO_EN, Pin_EN[i], RESET);
 		} else {
@@ -286,9 +289,24 @@ void EnableOne7SEG(int LED_ID){
 		}
 	}
 }
-void DisplayMultiple7SEG(int status, int num){
-	EnableOne7SEG(status);
+void DisplayMultiple7SEG(int index, int num){
+	EnableOne7SEG(index);
 	DisplayOne7SEG(num);
+}
+void Update7SEG(int index){
+	if (index > 3) return;
+	DisplayMultiple7SEG(index, _7SEG_Buffer[index]);
+}
+void TestClockBuffer(void){
+	_7SEG_Buffer[MAX_7SEG - 1]++;
+	for(int i = MAX_7SEG - 1; i >= 0; i--){
+		if (_7SEG_Buffer[i] >= 10) {
+			_7SEG_Buffer[i] = 0;
+			if (i > 0){
+				_7SEG_Buffer[i - 1]++;
+			}
+		}
+	}
 }
 /* USER CODE END 4 */
 
