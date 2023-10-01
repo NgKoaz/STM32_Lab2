@@ -119,7 +119,7 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   SetTimerLED(20);
-  SetTimer7SEG(50);
+  SetTimer7SEG(25);
   SetTimerDOT(100);
   while (1)
   {
@@ -134,7 +134,7 @@ int main(void)
 		  HAL_GPIO_TogglePin(DOT_GPIO_Port, DOT_Pin);
 	  }
 	  if (GetFlagTimer7SEG()){
-		  SetTimer7SEG(50);
+		  SetTimer7SEG(25);
 		  _7SEG_Index = (_7SEG_Index + 1) % MAX_7SEG;
 		  Update7SEG(_7SEG_Index);
 	  }

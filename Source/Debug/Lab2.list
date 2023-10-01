@@ -119,8 +119,8 @@ int main(void)
   SetTimerLED(20);
  8000166:	2014      	movs	r0, #20
  8000168:	f000 fa59 	bl	800061e <SetTimerLED>
-  SetTimer7SEG(50);
- 800016c:	2032      	movs	r0, #50	; 0x32
+  SetTimer7SEG(25);
+ 800016c:	2019      	movs	r0, #25
  800016e:	f000 fa3b 	bl	80005e8 <SetTimer7SEG>
   SetTimerDOT(100);
  8000172:	2064      	movs	r0, #100	; 0x64
@@ -161,8 +161,8 @@ int main(void)
  80001b0:	4603      	mov	r3, r0
  80001b2:	2b00      	cmp	r3, #0
  80001b4:	d0e0      	beq.n	8000178 <main+0x2c>
-		  SetTimer7SEG(50);
- 80001b6:	2032      	movs	r0, #50	; 0x32
+		  SetTimer7SEG(25);
+ 80001b6:	2019      	movs	r0, #25
  80001b8:	f000 fa16 	bl	80005e8 <SetTimer7SEG>
 		  _7SEG_Index = (_7SEG_Index + 1) % MAX_7SEG;
  80001bc:	4b0a      	ldr	r3, [pc, #40]	; (80001e8 <main+0x9c>)
