@@ -123,21 +123,7 @@ int main(void)
   SetTimerDOT(100);
   while (1)
   {
-	  if (GetFlagTimerLED()) {
-		  SetTimerLED(100);
-		  HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
 
-		  TestClockBuffer();
-	  }
-	  if (GetFlagTimerDOT()){
-		  SetTimerDOT(100);
-		  HAL_GPIO_TogglePin(DOT_GPIO_Port, DOT_Pin);
-	  }
-	  if (GetFlagTimer7SEG()){
-		  SetTimer7SEG(50);
-		  _7SEG_Index = (_7SEG_Index + 1) % MAX_7SEG;
-		  Update7SEG(_7SEG_Index);
-	  }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -271,6 +257,21 @@ static void MX_GPIO_Init(void)
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
 	TimerRun();
+	if (GetFlagTimerLED()) {
+		SetTimerLED(100);
+	  	HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+	  	// For testing
+	  	TestClockBuffer();
+	}
+	if (GetFlagTimerDOT()){
+		SetTimerDOT(100);
+		HAL_GPIO_TogglePin(DOT_GPIO_Port, DOT_Pin);
+	}
+	if (GetFlagTimer7SEG()){
+		SetTimer7SEG(50);
+		_7SEG_Index = (_7SEG_Index + 1) % MAX_7SEG;
+		Update7SEG(_7SEG_Index);
+	}
 }
 void DisplayOne7SEG(int num){
 	if (num > 9 || num < 0) return;
