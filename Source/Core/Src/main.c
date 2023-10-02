@@ -32,9 +32,11 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 #define MAX_7SEG 4
+#define MAX_LED_MATRIX 8
 #define COUNTER_LED 1000
 #define COUNTER_7SEG 250
 #define COUNTER_DOT 1000
+#define COUNTER_LEDMX 10
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -46,11 +48,7 @@
 TIM_HandleTypeDef htim2;
 
 /* USER CODE BEGIN PV */
-const short b[10] = {
-		1, 79, 18, 6, 76,
-		36, 32, 15, 0, 4
-};
-
+//--------SET GPIO & PIN--------
 GPIO_TypeDef* GPIO_7SEG = GPIOB;
 const short Pin_7SEG[7] = {
 	_7SEG_A_Pin, _7SEG_B_Pin, _7SEG_C_Pin, _7SEG_D_Pin,
@@ -62,10 +60,46 @@ const short Pin_EN[MAX_7SEG] = {
 	EN0_Pin, EN1_Pin, EN2_Pin, EN3_Pin
 };
 
-int _7SEG_Index = 0;
+GPIO_TypeDef* GPIO_ENM = GPIOA;
+const short Pin_ENM[MAX_LED_MATRIX] = {
+		ENM0_Pin, ENM1_Pin, ENM2_Pin, ENM3_Pin,
+		ENM4_Pin, ENM5_Pin, ENM6_Pin, ENM7_Pin
+};
+
+GPIO_TypeDef* GPIO_ROW = GPIOB;
+const short Pin_ROW[MAX_LED_MATRIX] = {
+		ROW0_Pin, ROW1_Pin, ROW2_Pin, ROW3_Pin,
+		ROW4_Pin, ROW5_Pin, ROW6_Pin, ROW7_Pin
+};
+
+//--------Buffer--------
+// 0: Turn on | 1: Turn off
+const short b[10] = {
+		1, 79, 18, 6, 76,
+		36, 32, 15, 0, 4
+};
 int _7SEG_Buffer[MAX_7SEG] = {
 		1, 1, 1, 2
 };
+// 0: Turn on | 1: Turn off
+/*
+ * 1  1  1  0  0  1  1  1
+ * 1  1  0  0  0  0  1  1
+ * 1  0  0  1  1  0  0  1
+ * 1  0  0  1  1  0  0  1
+ * 1  0  0  0  0  0  0  1
+ * 1  0  0  0  0  0  0  1
+ * 1  0  0  1  1  0  0  1
+ * 1  0  0  1  1  0  0  1
+ */
+uint8_t LEDMX_Buffer[MAX_LED_MATRIX] = {
+		0xFF, 0xC0, 0x80, 0x33,
+		0x33, 0x80, 0xC0, 0xFF
+};
+
+//--------Another--------
+int _7SEG_Index = 0;
+int LEDMX_IndexCol = 0;
 
 int hour = 0;
 int minute = 0;
@@ -78,12 +112,19 @@ static void MX_GPIO_Init(void);
 static void MX_TIM2_Init(void);
 /* USER CODE BEGIN PFP */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim);
-void DisplayOne7SEG(int num);
+void SetUp(void);
+void UpdateDataBus7SEG(int num);
 void EnableOne7SEG(int LED_ID);
-void DisplayMultiple7SEG(int status, int num);
+void DisplayOne7SEG(int status, int num);
 void Update7SEG(int index);
 void UpdateClockBuffer(void);
 void ClockTickTick(void);
+
+void EnableColumnLEDMatrix(int index_col);
+void UpdateDataRowBus(uint8_t num);
+void DisplayOneColumnLEDMatrix(int index, uint8_t num);
+void UpdateLEDMatrix(int index);
+void UpdateLEDMatrixBuffer(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -126,16 +167,13 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  SetTimerLED(COUNTER_LED);
-  SetTimer7SEG(COUNTER_7SEG);
-  SetTimerDOT(COUNTER_DOT);
-  UpdateClockBuffer();
+  SetUp();
   while (1)
   {
 	  if (GetFlagTimerLED()) {
+		  //Invoked every one second.
 		  SetTimerLED(COUNTER_LED);
 		  HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-		  //Invoked every one second.
 		  ClockTickTick();
 	  }
 	  if (GetFlagTimerDOT()){
@@ -144,10 +182,16 @@ int main(void)
 		  HAL_GPIO_TogglePin(DOT_GPIO_Port, DOT_Pin);
 	  }
 	  if (GetFlagTimer7SEG()){
-		  SetTimer7SEG(COUNTER_7SEG);
 		  //Switching LED every 250ms
+		  SetTimer7SEG(COUNTER_7SEG);
 		  _7SEG_Index = (_7SEG_Index + 1) % MAX_7SEG;
 		  Update7SEG(_7SEG_Index);
+	  }
+	  if (GetFlagTimerLEDMX()){
+		  //Switching column every 20ms
+		  SetTimerLEDMX(COUNTER_LEDMX);
+		  LEDMX_IndexCol = (LEDMX_IndexCol + 1) % MAX_LED_MATRIX;
+		  UpdateLEDMatrix(LEDMX_IndexCol);
 	  }
     /* USER CODE END WHILE */
 
@@ -251,26 +295,38 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, DOT_Pin|LED_Pin|EN0_Pin|EN1_Pin
-                          |EN2_Pin|EN3_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, ENM0_Pin|ENM1_Pin|DOT_Pin|LED_Pin
+                          |EN0_Pin|EN1_Pin|EN2_Pin|EN3_Pin
+                          |ENM2_Pin|ENM3_Pin|ENM4_Pin|ENM5_Pin
+                          |ENM6_Pin|ENM7_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, _7SEG_A_Pin|_7SEG_B_Pin|_7SEG_C_Pin|_7SEG_D_Pin
-                          |_7SEG_E_Pin|_7SEG_F_Pin|_7SEG_G_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, _7SEG_A_Pin|_7SEG_B_Pin|_7SEG_C_Pin|ROW2_Pin
+                          |ROW3_Pin|ROW4_Pin|ROW5_Pin|ROW6_Pin
+                          |ROW7_Pin|_7SEG_D_Pin|_7SEG_E_Pin|_7SEG_F_Pin
+                          |_7SEG_G_Pin|ROW0_Pin|ROW1_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pins : DOT_Pin LED_Pin EN0_Pin EN1_Pin
-                           EN2_Pin EN3_Pin */
-  GPIO_InitStruct.Pin = DOT_Pin|LED_Pin|EN0_Pin|EN1_Pin
-                          |EN2_Pin|EN3_Pin;
+  /*Configure GPIO pins : ENM0_Pin ENM1_Pin DOT_Pin LED_Pin
+                           EN0_Pin EN1_Pin EN2_Pin EN3_Pin
+                           ENM2_Pin ENM3_Pin ENM4_Pin ENM5_Pin
+                           ENM6_Pin ENM7_Pin */
+  GPIO_InitStruct.Pin = ENM0_Pin|ENM1_Pin|DOT_Pin|LED_Pin
+                          |EN0_Pin|EN1_Pin|EN2_Pin|EN3_Pin
+                          |ENM2_Pin|ENM3_Pin|ENM4_Pin|ENM5_Pin
+                          |ENM6_Pin|ENM7_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : _7SEG_A_Pin _7SEG_B_Pin _7SEG_C_Pin _7SEG_D_Pin
-                           _7SEG_E_Pin _7SEG_F_Pin _7SEG_G_Pin */
-  GPIO_InitStruct.Pin = _7SEG_A_Pin|_7SEG_B_Pin|_7SEG_C_Pin|_7SEG_D_Pin
-                          |_7SEG_E_Pin|_7SEG_F_Pin|_7SEG_G_Pin;
+  /*Configure GPIO pins : _7SEG_A_Pin _7SEG_B_Pin _7SEG_C_Pin ROW2_Pin
+                           ROW3_Pin ROW4_Pin ROW5_Pin ROW6_Pin
+                           ROW7_Pin _7SEG_D_Pin _7SEG_E_Pin _7SEG_F_Pin
+                           _7SEG_G_Pin ROW0_Pin ROW1_Pin */
+  GPIO_InitStruct.Pin = _7SEG_A_Pin|_7SEG_B_Pin|_7SEG_C_Pin|ROW2_Pin
+                          |ROW3_Pin|ROW4_Pin|ROW5_Pin|ROW6_Pin
+                          |ROW7_Pin|_7SEG_D_Pin|_7SEG_E_Pin|_7SEG_F_Pin
+                          |_7SEG_G_Pin|ROW0_Pin|ROW1_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -279,11 +335,18 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
-{
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 	TimerRun();
 }
-void DisplayOne7SEG(int num){
+void SetUp(){
+	SetTimerLED(COUNTER_LED);
+	SetTimer7SEG(COUNTER_7SEG);
+	SetTimerDOT(COUNTER_DOT);
+	SetTimerLEDMX(COUNTER_LEDMX);
+	UpdateClockBuffer();
+	UpdateLEDMatrixBuffer();
+}
+void UpdateDataBus7SEG(int num){
 	if (num > 9 || num < 0) return;
 	int sel = b[num];
 	for (int i = 6; i >= 0; i--){
@@ -300,13 +363,13 @@ void EnableOne7SEG(int LED_ID){
 		}
 	}
 }
-void DisplayMultiple7SEG(int index, int num){
+void DisplayOne7SEG(int index, int num){
 	EnableOne7SEG(index);
-	DisplayOne7SEG(num);
+	UpdateDataBus7SEG(num);
 }
 void Update7SEG(int index){
 	if (index > 3) return;
-	DisplayMultiple7SEG(index, _7SEG_Buffer[index]);
+	DisplayOne7SEG(index, _7SEG_Buffer[index]);
 }
 void UpdateClockBuffer(void){
 	_7SEG_Buffer[0] = hour / 10;
@@ -328,6 +391,34 @@ void ClockTickTick(void){
 		hour = 0;
 	}
 	UpdateClockBuffer();
+}
+
+
+void EnableColumnLEDMatrix(int index_col){
+	for(int i = 0; i < MAX_LED_MATRIX; i++){
+		if (i == index_col) {
+			HAL_GPIO_WritePin(GPIO_ENM, Pin_ENM[i], RESET);
+		} else {
+			HAL_GPIO_WritePin(GPIO_ENM, Pin_ENM[i], SET);
+		}
+	}
+}
+void UpdateDataRowBus(uint8_t num){
+	for (int i = MAX_LED_MATRIX - 1; i >= 0; i--){
+		HAL_GPIO_WritePin(GPIO_ROW, Pin_ROW[i], num % 2);
+		num /= 2;
+	}
+}
+void DisplayOneColumnLEDMatrix(int index, uint8_t num){
+	EnableColumnLEDMatrix(index);
+	UpdateDataRowBus(num);
+}
+void UpdateLEDMatrix(int index){
+	if (index > MAX_LED_MATRIX) return;
+	DisplayOneColumnLEDMatrix(index, LEDMX_Buffer[index]);
+}
+void UpdateLEDMatrixBuffer(void){
+	//Later
 }
 /* USER CODE END 4 */
 

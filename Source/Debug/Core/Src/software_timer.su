@@ -10,4 +10,7 @@
 ../Core/Src/software_timer.c:50:6:SetTimerDOT	16	static
 ../Core/Src/software_timer.c:53:7:GetFlagTimerDOT	8	static
 ../Core/Src/software_timer.c:56:6:TimerRunDOT	8	static
-../Core/Src/software_timer.c:61:6:TimerRun	8	static
+../Core/Src/software_timer.c:61:6:SetTimerLEDMX	16	static
+../Core/Src/software_timer.c:64:7:GetFlagTimerLEDMX	8	static
+../Core/Src/software_timer.c:67:6:TimerRunLEDMX	8	static
+../Core/Src/software_timer.c:72:6:TimerRun	8	static

@@ -58,8 +58,20 @@ void TimerRunDOT(){
 }
 
 
+void SetTimerLEDMX(int duration){
+	SetTimerDefault(duration, TIMER_FOR_LEDMX);
+}
+short GetFlagTimerLEDMX(){
+	return GetFlagTimerDefault(TIMER_FOR_LEDMX);
+}
+void TimerRunLEDMX(){
+	TimerRunDefault(TIMER_FOR_LEDMX);
+}
+
+
 void TimerRun(){
 	TimerRun7SEG();
 	TimerRunLED();
 	TimerRunDOT();
+	TimerRunLEDMX();
 }
