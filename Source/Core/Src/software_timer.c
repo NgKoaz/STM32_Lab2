@@ -69,9 +69,22 @@ void TimerRunLEDMX(){
 }
 
 
+void SetTimerShift(int duration){
+	SetTimerDefault(duration, TIMER_FOR_SHIFT);
+}
+short GetFlagTimerShift(){
+	return GetFlagTimerDefault(TIMER_FOR_SHIFT);
+}
+void TimerRunShift(){
+	TimerRunDefault(TIMER_FOR_SHIFT);
+}
+
+
+
 void TimerRun(){
 	TimerRun7SEG();
 	TimerRunLED();
 	TimerRunDOT();
 	TimerRunLEDMX();
+	TimerRunShift();
 }

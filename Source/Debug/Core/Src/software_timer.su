@@ -13,4 +13,7 @@
 ../Core/Src/software_timer.c:61:6:SetTimerLEDMX	16	static
 ../Core/Src/software_timer.c:64:7:GetFlagTimerLEDMX	8	static
 ../Core/Src/software_timer.c:67:6:TimerRunLEDMX	8	static
-../Core/Src/software_timer.c:72:6:TimerRun	8	static
+../Core/Src/software_timer.c:72:6:SetTimerShift	16	static
+../Core/Src/software_timer.c:75:7:GetFlagTimerShift	8	static
+../Core/Src/software_timer.c:78:6:TimerRunShift	8	static
+../Core/Src/software_timer.c:84:6:TimerRun	8	static

@@ -33,10 +33,12 @@
 /* USER CODE BEGIN PD */
 #define MAX_7SEG 4
 #define MAX_LED_MATRIX 8
-#define COUNTER_LED 1000
-#define COUNTER_7SEG 250
-#define COUNTER_DOT 1000
-#define COUNTER_LEDMX 10
+#define DURATION_LED 1000
+#define DURATION_7SEG 250
+#define DURATION_DOT 1000
+#define DURATION_LEDMX 10
+#define DURATION_SHIFT 240
+#define LENGTH_BUFFER_PATTERN (MAX_LED_MATRIX * 4)
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -82,7 +84,37 @@ int _7SEG_Buffer[MAX_7SEG] = {
 		1, 1, 1, 2
 };
 // 0: Turn on | 1: Turn off
-/*
+/* K
+ * 1  0  0  1  1  0  0  1
+ * 1  0  0  1  1  0  0  1
+ * 1  0  0  1  0  0  1  1
+ * 1  0  0  0  0  1  1  1
+ * 1  0  0  0  0  1  1  1
+ * 1  0  0  1  0  0  1  1
+ * 1  0  0  1  1  0  0  1
+ * 1  0  0  1  1  0  0  1
+ */
+/* H
+ * 1  0  0  1  1  0  0  1
+ * 1  0  0  1  1  0  0  1
+ * 1  0  0  1  1  0  0  1
+ * 1  0  0  0  0  0  0  1
+ * 1  0  0  0  0  0  0  1
+ * 1  0  0  1  1  0  0  1
+ * 1  0  0  1  1  0  0  1
+ * 1  0  0  1  1  0  0  1
+ */
+/* O
+ * 1  1  1  0  0  1  1  1
+ * 1  1  0  0  0  0  1  1
+ * 1  0  0  1  1  0  0  1
+ * 1  0  0  1  1  0  0  1
+ * 1  0  0  1  1  0  0  1
+ * 1  0  0  1  1  0  0  1
+ * 1  1  0  0  0  0  0  1
+ * 1  1  1  0  0  1  1  1
+ */
+/* A
  * 1  1  1  0  0  1  1  1
  * 1  1  0  0  0  0  1  1
  * 1  0  0  1  1  0  0  1
@@ -92,15 +124,34 @@ int _7SEG_Buffer[MAX_7SEG] = {
  * 1  0  0  1  1  0  0  1
  * 1  0  0  1  1  0  0  1
  */
-uint8_t LEDMX_Buffer[MAX_LED_MATRIX] = {
+uint8_t LEDMX_Pattern[LENGTH_BUFFER_PATTERN] = {
+		//K
+		0xFF, 0x00, 0x00, 0xE7,
+		0xC3, 0x18, 0x3C, 0xFF,
+		//H
+		0xFF, 0x00, 0x00, 0xE7,
+		0xE7, 0x00, 0x00, 0xFF,
+		//0
+		0xFF, 0xC3, 0x81, 0x3C,
+		0x3C, 0x81, 0xC3, 0xFF,
+		//A
 		0xFF, 0xC0, 0x80, 0x33,
 		0x33, 0x80, 0xC0, 0xFF
 };
 
+uint8_t LEDMX_Buffer[MAX_LED_MATRIX] = {
+		//K
+		0xFF, 0x00, 0x00, 0xE7,
+		0xC3, 0x18, 0x3C, 0xFF
+};
+
+
 //--------Another--------
 int _7SEG_Index = 0;
 int LEDMX_IndexCol = 0;
+int shiftingIndex = 0;
 
+//--------Clock--------
 int hour = 0;
 int minute = 0;
 int second = 0;
@@ -172,26 +223,31 @@ int main(void)
   {
 	  if (GetFlagTimerLED()) {
 		  //Invoked every one second.
-		  SetTimerLED(COUNTER_LED);
+		  SetTimerLED(DURATION_LED);
 		  HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
 		  ClockTickTick();
 	  }
 	  if (GetFlagTimerDOT()){
 		  //Invoked every one second.
-		  SetTimerDOT(COUNTER_DOT);
+		  SetTimerDOT(DURATION_DOT);
 		  HAL_GPIO_TogglePin(DOT_GPIO_Port, DOT_Pin);
 	  }
 	  if (GetFlagTimer7SEG()){
 		  //Switching LED every 250ms
-		  SetTimer7SEG(COUNTER_7SEG);
+		  SetTimer7SEG(DURATION_7SEG);
 		  _7SEG_Index = (_7SEG_Index + 1) % MAX_7SEG;
 		  Update7SEG(_7SEG_Index);
 	  }
 	  if (GetFlagTimerLEDMX()){
 		  //Switching column every 20ms
-		  SetTimerLEDMX(COUNTER_LEDMX);
+		  SetTimerLEDMX(DURATION_LEDMX);
 		  LEDMX_IndexCol = (LEDMX_IndexCol + 1) % MAX_LED_MATRIX;
 		  UpdateLEDMatrix(LEDMX_IndexCol);
+	  }
+	  if (GetFlagTimerShift()){
+		  SetTimerShift(DURATION_SHIFT);
+		  shiftingIndex = (shiftingIndex + 1) % LENGTH_BUFFER_PATTERN;
+		  UpdateLEDMatrixBuffer();
 	  }
     /* USER CODE END WHILE */
 
@@ -339,10 +395,11 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 	TimerRun();
 }
 void SetUp(){
-	SetTimerLED(COUNTER_LED);
-	SetTimer7SEG(COUNTER_7SEG);
-	SetTimerDOT(COUNTER_DOT);
-	SetTimerLEDMX(COUNTER_LEDMX);
+	SetTimerLED(DURATION_LED);
+	SetTimer7SEG(DURATION_7SEG);
+	SetTimerDOT(DURATION_DOT);
+	SetTimerLEDMX(DURATION_LEDMX);
+	SetTimerShift(DURATION_SHIFT);
 	UpdateClockBuffer();
 	UpdateLEDMatrixBuffer();
 }
@@ -418,7 +475,9 @@ void UpdateLEDMatrix(int index){
 	DisplayOneColumnLEDMatrix(index, LEDMX_Buffer[index]);
 }
 void UpdateLEDMatrixBuffer(void){
-	//Later
+	for (int i = 0; i < 8; i++){
+		LEDMX_Buffer[i] = LEDMX_Pattern[(shiftingIndex + i) % LENGTH_BUFFER_PATTERN];
+	}
 }
 /* USER CODE END 4 */
 
