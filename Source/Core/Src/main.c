@@ -31,7 +31,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define NUMBER_7SEG 2
+#define MAX_7SEG 2
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -55,7 +55,7 @@ const short Pin_7SEG[7] = {
 };
 
 GPIO_TypeDef* GPIO_EN = GPIOA;
-const short Pin_EN[NUMBER_7SEG] = {
+const short Pin_EN[MAX_7SEG] = {
 	EN0_Pin, EN1_Pin
 };
 
@@ -117,15 +117,7 @@ int main(void)
   SetTimer7SEG(50);
   while (1)
   {
-	  if (GetFlagTimerLED()) {
-		  SetTimerLED(100);
-		  HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-	  }
-	  if (GetFlagTimer7SEG()){
-		  SetTimer7SEG(50);
-		  LED_ID = (LED_ID + 1) % NUMBER_7SEG;
-		  DisplayMultiple7SEG(LED_ID, LED_ID + 1);
-	  }
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -256,6 +248,15 @@ static void MX_GPIO_Init(void)
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
 	TimerRun();
+	if (GetFlagTimerLED()) {
+		SetTimerLED(100);
+	  	HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+	}
+	if (GetFlagTimer7SEG()){
+		SetTimer7SEG(50);
+		LED_ID = (LED_ID + 1) % MAX_7SEG;
+		DisplayMultiple7SEG(LED_ID, LED_ID + 1);
+	}
 }
 void DisplayOne7SEG(int num){
 	if (num > 9 || num < 0) return;
@@ -266,7 +267,7 @@ void DisplayOne7SEG(int num){
 	}
 }
 void EnableOne7SEG(int LED_ID){
-	for (int i = 0; i < NUMBER_7SEG; i++){
+	for (int i = 0; i < MAX_7SEG; i++){
 		if (i == LED_ID){
 			HAL_GPIO_WritePin(GPIO_EN, Pin_EN[i], RESET);
 		} else {
