@@ -11,7 +11,7 @@ int CounterTimer[NUMBER_COUNTER];
 short FlagTimer[NUMBER_COUNTER];
 
 void SetTimerDefault(int duration, int index){
-	CounterTimer[index] = duration;
+	CounterTimer[index] = duration / TIMER_CYCLE;
 	FlagTimer[index] = 0;
 }
 short GetFlagTimerDefault(int index){

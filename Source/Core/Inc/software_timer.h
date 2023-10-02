@@ -9,6 +9,7 @@
 #define INC_SOFTWARE_TIMER_H_
 
 #define NUMBER_COUNTER 3
+#define TIMER_CYCLE 10
 #define TIMER_FOR_7SEG 0
 #define TIMER_FOR_LED 1
 #define TIMER_FOR_DOT 2
