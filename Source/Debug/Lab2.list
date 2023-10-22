@@ -145,7 +145,7 @@ void updateDataBus7SEG(uint8_t index){
  80001b4:	4a2c      	ldr	r2, [pc, #176]	; (8000268 <updateDataBus7SEG+0xc8>)
  80001b6:	5cd3      	ldrb	r3, [r2, r3]
  80001b8:	73bb      	strb	r3, [r7, #14]
-	HAL_GPIO_WritePin(_7SEG_GPIO, G_7S_Pin, p_num % 2);
+	HAL_GPIO_WritePin(_7SEG_GPIO, G_7S_Pin, p_num & 0x1);
  80001ba:	7bbb      	ldrb	r3, [r7, #14]
  80001bc:	f003 0301 	and.w	r3, r3, #1
  80001c0:	b2db      	uxtb	r3, r3
@@ -157,7 +157,7 @@ void updateDataBus7SEG(uint8_t index){
  80001cc:	7bbb      	ldrb	r3, [r7, #14]
  80001ce:	085b      	lsrs	r3, r3, #1
  80001d0:	73bb      	strb	r3, [r7, #14]
-	HAL_GPIO_WritePin(_7SEG_GPIO, F_7S_Pin, p_num % 2);
+	HAL_GPIO_WritePin(_7SEG_GPIO, F_7S_Pin, p_num & 0x1);
  80001d2:	7bbb      	ldrb	r3, [r7, #14]
  80001d4:	f003 0301 	and.w	r3, r3, #1
  80001d8:	b2db      	uxtb	r3, r3
@@ -169,7 +169,7 @@ void updateDataBus7SEG(uint8_t index){
  80001e4:	7bbb      	ldrb	r3, [r7, #14]
  80001e6:	085b      	lsrs	r3, r3, #1
  80001e8:	73bb      	strb	r3, [r7, #14]
-	HAL_GPIO_WritePin(_7SEG_GPIO, E_7S_Pin, p_num % 2);
+	HAL_GPIO_WritePin(_7SEG_GPIO, E_7S_Pin, p_num & 0x1);
  80001ea:	7bbb      	ldrb	r3, [r7, #14]
  80001ec:	f003 0301 	and.w	r3, r3, #1
  80001f0:	b2db      	uxtb	r3, r3
@@ -181,7 +181,7 @@ void updateDataBus7SEG(uint8_t index){
  80001fc:	7bbb      	ldrb	r3, [r7, #14]
  80001fe:	085b      	lsrs	r3, r3, #1
  8000200:	73bb      	strb	r3, [r7, #14]
-	HAL_GPIO_WritePin(_7SEG_GPIO, D_7S_Pin, p_num % 2);
+	HAL_GPIO_WritePin(_7SEG_GPIO, D_7S_Pin, p_num & 0x1);
  8000202:	7bbb      	ldrb	r3, [r7, #14]
  8000204:	f003 0301 	and.w	r3, r3, #1
  8000208:	b2db      	uxtb	r3, r3
@@ -193,7 +193,7 @@ void updateDataBus7SEG(uint8_t index){
  8000214:	7bbb      	ldrb	r3, [r7, #14]
  8000216:	085b      	lsrs	r3, r3, #1
  8000218:	73bb      	strb	r3, [r7, #14]
-	HAL_GPIO_WritePin(_7SEG_GPIO, C_7S_Pin, p_num % 2);
+	HAL_GPIO_WritePin(_7SEG_GPIO, C_7S_Pin, p_num & 0x1);
  800021a:	7bbb      	ldrb	r3, [r7, #14]
  800021c:	f003 0301 	and.w	r3, r3, #1
  8000220:	b2db      	uxtb	r3, r3
@@ -205,7 +205,7 @@ void updateDataBus7SEG(uint8_t index){
  800022c:	7bbb      	ldrb	r3, [r7, #14]
  800022e:	085b      	lsrs	r3, r3, #1
  8000230:	73bb      	strb	r3, [r7, #14]
-	HAL_GPIO_WritePin(_7SEG_GPIO, B_7S_Pin, p_num % 2);
+	HAL_GPIO_WritePin(_7SEG_GPIO, B_7S_Pin, p_num & 0x1);
  8000232:	7bbb      	ldrb	r3, [r7, #14]
  8000234:	f003 0301 	and.w	r3, r3, #1
  8000238:	b2db      	uxtb	r3, r3
@@ -217,7 +217,7 @@ void updateDataBus7SEG(uint8_t index){
  8000244:	7bbb      	ldrb	r3, [r7, #14]
  8000246:	085b      	lsrs	r3, r3, #1
  8000248:	73bb      	strb	r3, [r7, #14]
-	HAL_GPIO_WritePin(_7SEG_GPIO, A_7S_Pin, p_num % 2);
+	HAL_GPIO_WritePin(_7SEG_GPIO, A_7S_Pin, p_num & 0x1);
  800024a:	7bbb      	ldrb	r3, [r7, #14]
  800024c:	f003 0301 	and.w	r3, r3, #1
  8000250:	b2db      	uxtb	r3, r3

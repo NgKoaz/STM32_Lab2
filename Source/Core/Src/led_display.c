@@ -41,19 +41,19 @@ void led_Display_Init(void){
 void updateDataBus7SEG(uint8_t index){
 	uint8_t num = buffer_7SEG[index];
 	uint8_t p_num = pattern[num];
-	HAL_GPIO_WritePin(_7SEG_GPIO, G_7S_Pin, p_num % 2);
+	HAL_GPIO_WritePin(_7SEG_GPIO, G_7S_Pin, p_num & 0x1);
 	p_num >>= 1;
-	HAL_GPIO_WritePin(_7SEG_GPIO, F_7S_Pin, p_num % 2);
+	HAL_GPIO_WritePin(_7SEG_GPIO, F_7S_Pin, p_num & 0x1);
 	p_num >>= 1;
-	HAL_GPIO_WritePin(_7SEG_GPIO, E_7S_Pin, p_num % 2);
+	HAL_GPIO_WritePin(_7SEG_GPIO, E_7S_Pin, p_num & 0x1);
 	p_num >>= 1;
-	HAL_GPIO_WritePin(_7SEG_GPIO, D_7S_Pin, p_num % 2);
+	HAL_GPIO_WritePin(_7SEG_GPIO, D_7S_Pin, p_num & 0x1);
 	p_num >>= 1;
-	HAL_GPIO_WritePin(_7SEG_GPIO, C_7S_Pin, p_num % 2);
+	HAL_GPIO_WritePin(_7SEG_GPIO, C_7S_Pin, p_num & 0x1);
 	p_num >>= 1;
-	HAL_GPIO_WritePin(_7SEG_GPIO, B_7S_Pin, p_num % 2);
+	HAL_GPIO_WritePin(_7SEG_GPIO, B_7S_Pin, p_num & 0x1);
 	p_num >>= 1;
-	HAL_GPIO_WritePin(_7SEG_GPIO, A_7S_Pin, p_num % 2);
+	HAL_GPIO_WritePin(_7SEG_GPIO, A_7S_Pin, p_num & 0x1);
 }
 
 void scanning7SEG(void){

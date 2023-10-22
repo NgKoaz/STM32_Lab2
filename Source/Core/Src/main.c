@@ -260,7 +260,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		dot_counter = 100;
 		HAL_GPIO_TogglePin(DOT_GPIO_Port, DOT_Pin);
 	}
-
 }
 /* USER CODE END 4 */
 
