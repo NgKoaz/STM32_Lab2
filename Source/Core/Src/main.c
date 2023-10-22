@@ -43,6 +43,7 @@ TIM_HandleTypeDef htim2;
 
 /* USER CODE BEGIN PV */
 short counter = 50;
+short dot_counter = 100;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -91,6 +92,8 @@ int main(void)
   led_Display_Init();
   buffer_7SEG[0] = 1;
   buffer_7SEG[1] = 2;
+  buffer_7SEG[2] = 3;
+  buffer_7SEG[3] = 0;
 
   HAL_TIM_Base_Start_IT(&htim2);
   /* USER CODE END 2 */
@@ -251,6 +254,11 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	if (counter <= 0) {
 		counter = 50;
 		scanning7SEG();
+	}
+	dot_counter--;
+	if (dot_counter <= 0){
+		dot_counter = 100;
+		HAL_GPIO_TogglePin(DOT_GPIO_Port, DOT_Pin);
 	}
 
 }

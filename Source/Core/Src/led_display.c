@@ -23,8 +23,8 @@ const short _7SEG_Pin[7] = {
 		E_7S_Pin, F_7S_Pin, G_7S_Pin
 };
 const short EN_Pin[TOTAL_LED] = {
-		EN0_Pin, EN1_Pin/*, EN2_Pin, EN3_Pin,
-		EN4_Pin, EN5_Pin*/
+		EN0_Pin, EN1_Pin, EN2_Pin, EN3_Pin,
+		/*EN4_Pin, EN5_Pin*/
 };
 
 uint8_t buffer_7SEG[TOTAL_LED];
