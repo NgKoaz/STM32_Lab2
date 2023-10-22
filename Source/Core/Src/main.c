@@ -44,6 +44,9 @@ TIM_HandleTypeDef htim2;
 /* USER CODE BEGIN PV */
 short counter = 25;
 short dot_counter = 100;
+
+uint8_t hour = 15, minute = 8, second = 50;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -52,6 +55,7 @@ static void MX_GPIO_Init(void);
 static void MX_TIM2_Init(void);
 /* USER CODE BEGIN PFP */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim);
+void updateClockBuffer(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -104,7 +108,20 @@ int main(void)
 
   while (1)
   {
-
+	  second++;
+	  if (second >= 60){
+		  second = 0;
+		  minute++;
+	  }
+	  if(minute >= 60){
+		  minute = 0;
+		  hour++;
+	  }
+	  if(hour >=24){
+		  hour = 0;
+	  }
+	  updateClockBuffer();
+	  HAL_Delay(1000);
 
     /* USER CODE END WHILE */
 
@@ -260,6 +277,14 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		dot_counter = 100;
 		HAL_GPIO_TogglePin(DOT_GPIO_Port, DOT_Pin);
 	}
+}
+void updateClockBuffer(void){
+	buffer_7SEG[0] = hour / 10;
+	buffer_7SEG[1] = hour % 10;
+	buffer_7SEG[2] = minute / 10;
+	buffer_7SEG[3] = minute % 10;
+	buffer_7SEG[4] = second / 10;
+	buffer_7SEG[5] = second % 10;
 }
 /* USER CODE END 4 */
 

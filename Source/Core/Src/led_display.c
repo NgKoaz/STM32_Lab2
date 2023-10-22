@@ -24,7 +24,7 @@ const short _7SEG_Pin[7] = {
 };
 const short EN_Pin[TOTAL_LED] = {
 		EN0_Pin, EN1_Pin, EN2_Pin, EN3_Pin,
-		/*EN4_Pin, EN5_Pin*/
+		EN4_Pin, EN5_Pin
 };
 
 uint8_t buffer_7SEG[TOTAL_LED];
@@ -35,7 +35,7 @@ void led_Display_Init(void){
 		buffer_7SEG[i] = 0;
 		HAL_GPIO_WritePin(EN_GPIO, EN_Pin[i], TURN_OFF);
 	}
-	led_index = TOTAL_LED - 1;
+	led_index = 0;
 }
 
 void updateDataBus7SEG(uint8_t index){
@@ -58,7 +58,8 @@ void updateDataBus7SEG(uint8_t index){
 
 void scanning7SEG(void){
 	//Turn off previous led
-	HAL_GPIO_WritePin(EN_GPIO, EN_Pin[led_index++], TURN_OFF);
+	HAL_GPIO_WritePin(EN_GPIO, EN_Pin[led_index], TURN_OFF);
+	led_index++;
 	if (led_index >= TOTAL_LED) {
 		led_index = 0;
 	}

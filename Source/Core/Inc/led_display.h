@@ -10,7 +10,7 @@
 
 #include "global.h"
 
-#define TOTAL_LED	4
+#define TOTAL_LED	6
 
 extern uint8_t buffer_7SEG[TOTAL_LED];
 
