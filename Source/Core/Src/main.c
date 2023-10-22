@@ -42,7 +42,7 @@
 TIM_HandleTypeDef htim2;
 
 /* USER CODE BEGIN PV */
-short counter = 50;
+short counter = 25;
 short dot_counter = 100;
 /* USER CODE END PV */
 
@@ -252,7 +252,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
 	counter--;
 	if (counter <= 0) {
-		counter = 50;
+		counter = 25;
 		scanning7SEG();
 	}
 	dot_counter--;

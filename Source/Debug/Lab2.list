@@ -695,9 +695,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
  80004ec:	f9b3 3000 	ldrsh.w	r3, [r3]
  80004f0:	2b00      	cmp	r3, #0
  80004f2:	dc04      	bgt.n	80004fe <HAL_TIM_PeriodElapsedCallback+0x2e>
-		counter = 50;
+		counter = 25;
  80004f4:	4b0e      	ldr	r3, [pc, #56]	; (8000530 <HAL_TIM_PeriodElapsedCallback+0x60>)
- 80004f6:	2232      	movs	r2, #50	; 0x32
+ 80004f6:	2219      	movs	r2, #25
  80004f8:	801a      	strh	r2, [r3, #0]
 		scanning7SEG();
  80004fa:	f7ff feb9 	bl	8000270 <scanning7SEG>
@@ -725,7 +725,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
  8000522:	4805      	ldr	r0, [pc, #20]	; (8000538 <HAL_TIM_PeriodElapsedCallback+0x68>)
  8000524:	f000 fbb8 	bl	8000c98 <HAL_GPIO_TogglePin>
 	}
-
 }
  8000528:	bf00      	nop
  800052a:	3708      	adds	r7, #8
