@@ -15,6 +15,8 @@
 extern uint8_t buffer_7SEG[TOTAL_LED];
 
 void led_Display_Init(void);
+void shiftingLeftBuffer(void);
 void scanning7SEG(void);
+void scanningMLED(void);
 
 #endif /* INC_LED_DISPLAY_H_ */

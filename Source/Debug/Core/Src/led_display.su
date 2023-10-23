@@ -1,3 +1,6 @@
-../Core/Src/led_display.c:33:6:led_Display_Init	16	static
-../Core/Src/led_display.c:41:6:updateDataBus7SEG	24	static
-../Core/Src/led_display.c:59:6:scanning7SEG	8	static
+../Core/Src/led_display.c:72:6:led_Display_Init	16	static
+../Core/Src/led_display.c:84:6:updateDataBus7SEG	24	static
+../Core/Src/led_display.c:101:6:scanning7SEG	8	static
+../Core/Src/led_display.c:117:6:shiftingLeftBuffer	4	static
+../Core/Src/led_display.c:123:6:updateRow	24	static
+../Core/Src/led_display.c:141:6:scanningMLED	16	static

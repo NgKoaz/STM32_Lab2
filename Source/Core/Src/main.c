@@ -42,9 +42,6 @@
 TIM_HandleTypeDef htim2;
 
 /* USER CODE BEGIN PV */
-short counter = 25;
-short dot_counter = 100;
-
 uint8_t hour = 15, minute = 8, second = 50;
 
 /* USER CODE END PV */
@@ -94,34 +91,50 @@ int main(void)
   MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
   led_Display_Init();
-  buffer_7SEG[0] = 1;
-  buffer_7SEG[1] = 2;
-  buffer_7SEG[2] = 3;
-  buffer_7SEG[3] = 0;
+
+  setTimer(SCANNING_TIMER, DUR_SCANNING);
+  setTimer(UPDATING_TIMER, DUR_UPDATING);
+  setTimer(SHIFTING_TIMER, DUR_SHIFTING);
 
   HAL_TIM_Base_Start_IT(&htim2);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 
-
   while (1)
   {
-	  second++;
-	  if (second >= 60){
-		  second = 0;
-		  minute++;
+	  if (getFlagTimer(SCANNING_TIMER)){
+		  setTimer(SCANNING_TIMER, DUR_SCANNING);
+		  scanning7SEG();
+		  scanningMLED();
 	  }
-	  if(minute >= 60){
-		  minute = 0;
-		  hour++;
+	  if (getFlagTimer(SHIFTING_TIMER)){
+		  setTimer(SHIFTING_TIMER, DUR_SHIFTING);
+		  shiftingLeftBuffer();
 	  }
-	  if(hour >=24){
-		  hour = 0;
+	  if (getFlagTimer(UPDATING_TIMER)){
+		  setTimer(UPDATING_TIMER, DUR_UPDATING);
+		  //Because UPDATING_TIMER frequent at 1HZ.
+		  //So I merge blink dot every one second into this section.
+		  //More optimize our timer. Got more time run in while.
+		  HAL_GPIO_TogglePin(DOT_GPIO_Port, DOT_Pin);
+
+		  second++;
+		  if (second >= 60){
+			  second = 0;
+			  minute++;
+		  }
+		  if(minute >= 60){
+			  minute = 0;
+			  hour++;
+		  }
+		  if(hour >= 24){
+			  hour = 0;
+		  }
+		  updateClockBuffer();
 	  }
-	  updateClockBuffer();
-	  HAL_Delay(1000);
 
     /* USER CODE END WHILE */
 
@@ -267,16 +280,7 @@ static void MX_GPIO_Init(void)
 /* USER CODE BEGIN 4 */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-	counter--;
-	if (counter <= 0) {
-		counter = 25;
-		scanning7SEG();
-	}
-	dot_counter--;
-	if (dot_counter <= 0){
-		dot_counter = 100;
-		HAL_GPIO_TogglePin(DOT_GPIO_Port, DOT_Pin);
-	}
+	timerRun();
 }
 void updateClockBuffer(void){
 	buffer_7SEG[0] = hour / 10;

@@ -10,5 +10,11 @@
 
 #include "main.h"
 #include "led_display.h"
+#include "timer.h"
+
+
+
+
+
 
 #endif /* INC_GLOBAL_H_ */
